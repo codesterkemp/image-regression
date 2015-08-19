@@ -5,7 +5,6 @@ def sel_main(link_list, output_dest)
   links = load_links(link_list)
   driver = Selenium::WebDriver.for :firefox
   links.each do |url|
-
     go_and_photo(url, output_dest, driver)
   end
   driver.close
@@ -37,12 +36,13 @@ if File.exist?("links.txt")
   main("links.txt", "")
 end
 
+#for Selenium the http:// or https:// are required
 #link list format
 #http://www.example.com/firstpage
-#www.example.com/some_other_page
-#www.example.com/index?some_param
+#https://www.example.com/some_other_page
+#http://www.example.com/index?some_param
 
 #which will go the pages and create these .png
 #http_www_example_com_firstpage.png
-#www_example_com_some_other_page
-#www_example_com_index_some_param
+#https_www_example_com_some_other_page
+#http_www_example_com_index_some_param
