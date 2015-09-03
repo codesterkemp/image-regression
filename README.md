@@ -8,12 +8,16 @@ imagemagick program
 firefox
 
 To use:
+
 clone repo.
-install selenium-webdriver gem
+
+gem install selenium-webdriver
+
 install imagemagick
+
 install firefox
 
 to demo tool run the img_regression_eng.rb
 
-the png files starting with _combined_ should a combined image consisting of pngs of the webpages you are comparing stitched together with the resulting comparison on the far right. All black indicates the pages are identical, while the light areas highglight the differences.
+the png files starting with \_combined\_ should a combined image consisting of pngs of the webpages you are comparing stitched together with the resulting comparison on the far right. All black indicates the pages are identical, while the light areas highglight the differences.
 
