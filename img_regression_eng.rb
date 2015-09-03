@@ -33,6 +33,7 @@ def collect_files_from_weblinks(web_links)
       link_list.each_with_index do |link, j|
         file_list<< create_link_file(link)
       end
+      puts "these are the links in file list #{file_list} for #{filename[i]}"
       @sources << write_text_to_file(file_list,filename[i])
     end
     close_down_webdriver
@@ -48,7 +49,7 @@ def main(inputs)
     web_links = get_live_urls(inputs)
   end
   collect_files_from_weblinks(web_links)
-
+  puts @sources
   image_overlay(@sources)
 
 end
@@ -56,14 +57,102 @@ end
 def image_overlay(sources, output_path = 'diff')
   input_a = File.open(sources[0], "r")
   input_b = File.open(sources[1], "r")
+  puts sources[0] + " vs " + sources[1]
   name = "diff"
   diff_dir = mkdir(name)
   puts diff_dir
-  while (line_a = input_a.gets && line_b = input_b.gets)
-    line_a = line_a.to_s.chomp
-    line_b = line_b.to_s.chomp
-    diff_img(line_a,line_b,diff_dir)
+  line_a = read_file_into_array(sources[0])
+  line_b = read_file_into_array(sources[1])
+  line_a.each_with_index do |live, i|
+    diff_img(live,line_b[i],diff_dir)
   end
+end
+
+def read_file_into_array(filename)
+  the_array = []
+  IO.foreach(filename) {|x| the_array << x }
+  puts the_array
+  the_array
+end
+
+
+#unused methods
+def prevent_overwrite(filename)
+  filename = remove_text_file_ending(filename)
+  i = 0
+  the_end = ".txt"
+  tempfilename = filename+the_end
+  while File.exist?(tempfilename)
+    tempfilename = filename + i.to_s + the_end
+    i += 1
+  end
+  return tempfilename
+end
+
+def write_text_to_file(the_array, filename = 'filename', overwrite = false)
+  unless overwrite
+    filename = prevent_overwrite(filename)
+  end
+  filename = add_text_ending(filename)
+  the_file = open(filename, 'w')
+  the_file.truncate(0)
+  the_array.each do |elem|
+    the_file.write("#{elem}\n")
+  end
+  the_file.close
+  return filename
+end
+
+#secondary methods
+
+def remove_text_file_ending(filename)
+  if filename.slice(-4, filename.length) == '.txt'
+    return filename.slice(0, filename.length - 4)
+  end
+  return filename
+end
+
+def add_text_ending(filename)
+  if filename.slice(-4, filename.length) == '.txt'
+    return filename
+  end
+  filename += '.txt'
+end
+
+#convert to ruby with gems in the future below.
+
+def diff_img(img_a, img_b, output_path)
+  img_a = img_a.chomp
+  img_b = img_b.chomp
+  puts "composite #{img_a} #{img_b} -compose difference _diff_#{img_a}"
+  system("composite #{img_a} #{img_b} -compose difference _diff_#{img_a}")
+  system("convert #{img_a} #{img_b} #{output_path}_diff_#{img_a} +append _combined_#{img_a}")
+end
+
+def mkdir(name, path = ".")
+  system("cd #{path}")
+  return if system("cd #{name}")
+  system("mkdir #{name}")
+  system("cd #{name}")
+  #returns new dir path
+  hold = system("pwd")
+  return hold
+end
+
+def photo_web_pages(link_file,dest_fold = ".")
+  file_names = sel_main(link_file,dest_fold)
+end
+
+def grab_path_from_file_name(filename)
+  filename = filename.split('/')
+  filename.pop
+  filename = filename.join('/')
+  filename+'/'
+end
+
+def grab_filename_from_path(fullpath)
+  fullpath = fullpath.split('/')
+  fullpath.pop
 end
 
 #depreciating methods
@@ -121,83 +210,6 @@ def hist_mode(current_urls)
   file_names = []
   file_names << photo_web_pages(current_urls,current_urls+"img")
   file_names
-end
-
-#unused methods
-def prevent_overwrite(filename)
-  filename = remove_text_file_ending(filename)
-  i = 0
-  the_end = ".txt"
-  tempfilename = filename+the_end
-  while File.exist?(tempfilename)
-    tempfilename = filename + i.to_s + the_end
-    i += 1
-  end
-  return tempfilename
-end
-
-def write_text_to_file(the_array, filename = 'filename', overwrite = false)
-  unless overwrite
-    filename = prevent_overwrite(filename)
-  end
-  filename = add_text_ending(filename)
-  the_file = open(filename, 'w')
-  the_file.truncate(0)
-  the_array.each do |elem|
-    the_file.write("#{elem}\n")
-  end
-  the_file.close
-  return filename
-end
-
-#secondary methods
-
-def remove_text_file_ending(filename)
-  if filename.slice(-4, filename.length) == '.txt'
-    return filename.slice(0, filename.length - 4)
-  end
-  return filename
-end
-
-def add_text_ending(filename)
-  if filename.slice(-4, filename.length) == '.txt'
-    return filename
-  end
-  filename += '.txt'
-end
-
-#convert to ruby with gems in the future below.
-
-def diff_img(img_a,img_b, output_path)
-  puts "#{output_path} is the output dir"
-  system("composite #{img_a} #{img_b} -compose difference #{output_path}_diff_#{img_a}")
-  system("convert #{img_a} #{img_b} #{output_path}_diff_#{img_a} +append _combined_#{img_a}")
-end
-
-def mkdir(name, path = ".")
-  system("cd #{path}")
-  return if system("cd #{name}")
-  system("mkdir #{name}")
-  system("cd #{name}")
-  #returns new dir path
-  hold = system("pwd")
-  return hold
-end
-
-def photo_web_pages(link_file,dest_fold = ".")
-  file_names = sel_main(link_file,dest_fold)
-end
-
-def grab_path_from_file_name(filename)
-  filename = filename.split('/')
-  filename.pop
-  filename = filename.join('/')
-  filename+'/'
-end
-
-def grab_filename_from_path(fullpath)
-  fullpath = fullpath.split('/')
-  fullpath.pop
 end
 
 inputs = {
