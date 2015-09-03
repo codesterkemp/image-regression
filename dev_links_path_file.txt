@@ -1,0 +1,3 @@
+https://encrypt2-cody.herokuapp.com/encode
+https://encrypt2-cody.herokuapp.com/about
+https://encrypt2-cody.herokuapp.com/crack

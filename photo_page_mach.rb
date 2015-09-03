@@ -1,13 +1,31 @@
 require 'selenium-webdriver'
 
+def spin_up_webdriver
+  @driver = Selenium::WebDriver.for :firefox
+end
+
+def close_down_webdriver
+  @driver.close
+end
+
+
 # main
 def sel_main(link_list, output_dest)
   links = load_links(link_list)
-  driver = Selenium::WebDriver.for :firefox
-  links.each do |url|
-    go_and_photo(url, output_dest, driver)
+  unless @driver
+    spin_up_webdriver
+  else
+    driver = @driver
+    close = false
   end
-  driver.close
+  img_file_list = []
+  links.each do |url|
+    img_file_list << go_and_photo(url, output_dest, driver)
+  end
+  if close
+    driver.close
+  end
+  img_file_list
 end
 
 # load link list
@@ -21,10 +39,17 @@ def load_links(text_file_name)
   url_list_array
 end
 
-def go_and_photo(url, output_dest, driver)
+def create_link_file(url)
+  filename = go_and_photo(url)
+end
+
+def go_and_photo(url)
   safe_url = safe_url_name(url)
-  driver.navigate.to url
-  driver.save_screenshot output_dest + safe_url+'.png'
+  @driver.navigate.to url
+  @driver.save_screenshot safe_url+'.png'
+  image_name = safe_url+'.png'
+  puts image_name
+  return image_name
 end
 
 def safe_url_name(url)
